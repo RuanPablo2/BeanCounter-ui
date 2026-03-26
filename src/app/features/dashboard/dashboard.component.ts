@@ -1,10 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
+
+import { DashboardService, DashboardSummary } from '../../core/services/dashboard.service';
+import { TransactionService, Transaction } from '../../core/services/transaction.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -19,21 +22,46 @@ import { MatTableModule } from '@angular/material/table';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent {
-
-  summary = {
-    balance: 5430.50,
-    incomes: 8200.00,
-    expenses: 2769.50
+export class DashboardComponent implements OnInit {
+  
+  summary: DashboardSummary = {
+    balance: 0,
+    totalIncome: 0,
+    totalExpense: 0
   };
 
   displayedColumns: string[] = ['description', 'date', 'type', 'amount'];
-  
-  recentTransactions = [
-    { description: 'Monthly Salary', date: new Date('2026-03-05'), type: 'INCOME', amount: 8200.00 },
-    { description: 'Apartment Rent', date: new Date('2026-03-10'), type: 'EXPENSE', amount: 1500.00 },
-    { description: 'Supermarket', date: new Date('2026-03-12'), type: 'EXPENSE', amount: 850.00 },
-    { description: 'Internet Bill', date: new Date('2026-03-15'), type: 'EXPENSE', amount: 120.00 },
-    { description: 'Steam Games', date: new Date('2026-03-20'), type: 'EXPENSE', amount: 299.50 }
-  ];
+  recentTransactions: Transaction[] = [];
+
+  constructor(
+    private dashboardService: DashboardService,
+    private transactionService: TransactionService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadDashboardData();
+  }
+
+  loadDashboardData(): void {
+    // Find the card totals
+    this.dashboardService.getSummary().subscribe({
+      next: (data) => {
+        console.log('DADOS REAIS DO DASHBOARD:', data);
+        this.summary = data;
+      },
+      error: (err) => {
+        console.error('Error loading dashboard summary', err);
+      }
+    });
+
+    // Retrieve the list of transactions for the table
+    this.transactionService.getTransactions().subscribe({
+      next: (data) => {
+        this.recentTransactions = data;
+      },
+      error: (err) => {
+        console.error('Error loading transactions', err);
+      }
+    });
+  }
 }

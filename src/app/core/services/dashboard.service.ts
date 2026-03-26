@@ -5,8 +5,8 @@ import { environment } from '../../../environments/environment';
 
 export interface DashboardSummary {
   balance: number;
-  incomes: number;
-  expenses: number;
+  totalIncome: number;
+  totalExpense: number;
 }
 
 @Injectable({
