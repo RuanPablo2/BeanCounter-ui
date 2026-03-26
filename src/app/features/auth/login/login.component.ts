@@ -1,13 +1,15 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -29,7 +31,11 @@ export class LoginComponent {
   loginForm: FormGroup;
   hidePassword = true;
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -38,9 +44,16 @@ export class LoginComponent {
 
   onSubmit() {
     if (this.loginForm.valid) {
-      console.log('Valid form! Data to send to Spring Boot:', this.loginForm.value);
-    } else {
-      console.log('Invalid form, please fill it correctly.');
+      this.authService.login(this.loginForm.value).subscribe({
+        next: (response) => {
+          console.log('Login successful!', response);
+          this.router.navigate(['/dashboard']);
+        },
+        error: (err) => {
+          console.error('Login failed:', err);
+          alert('Invalid email or password. Please try again.');
+        }
+      });
     }
   }
 }
