@@ -4,7 +4,9 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 import { DashboardService, DashboardSummary } from '../../core/services/dashboard.service';
 import { TransactionService, Transaction } from '../../core/services/transaction.service';
@@ -21,7 +23,9 @@ import { TransactionDialogComponent } from './components/transaction-dialog/tran
     MatIconModule,
     MatButtonModule,
     MatTableModule,
-    MatDialogModule
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule 
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
@@ -35,7 +39,8 @@ export class DashboardComponent implements OnInit {
   };
 
   displayedColumns: string[] = ['description', 'date', 'type', 'amount', 'actions'];
-  recentTransactions: Transaction[] = [];
+  
+  dataSource = new MatTableDataSource<Transaction>([]);
 
   constructor(
     private dashboardService: DashboardService,
@@ -49,47 +54,27 @@ export class DashboardComponent implements OnInit {
 
   loadDashboardData(): void {
     this.dashboardService.getSummary().subscribe({
-      next: (data) => {
-        console.log('DADOS REAIS DO DASHBOARD:', data);
-        this.summary = data;
-      },
-      error: (err) => {
-        console.error('Error loading dashboard summary', err);
-      }
+      next: (data) => this.summary = data,
+      error: (err) => console.error('Error loading dashboard summary', err)
     });
-
 
     this.transactionService.getTransactions().subscribe({
       next: (data) => {
-        this.recentTransactions = data;
+        this.dataSource.data = data;
       },
-      error: (err) => {
-        console.error('Error loading transactions', err);
-      }
+      error: (err) => console.error('Error loading transactions', err)
     });
   }
 
-  openNewTransactionDialog(): void {
-    const dialogRef = this.dialog.open(TransactionDialogComponent, {
-      width: '400px',
-      disableClose: true
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === true) {
-        this.loadDashboardData(); 
-      }
-    });
+  applyFilter(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
   deleteTransaction(id: number): void {
-
     if (confirm('Are you sure you want to delete this transaction?')) {
       this.transactionService.deleteTransaction(id).subscribe({
-        next: () => {
-          console.log('Transaction deleted!');
-          this.loadDashboardData();
-        },
+        next: () => this.loadDashboardData(),
         error: (err) => console.error('Error deleting transaction', err)
       });
     }
@@ -103,10 +88,18 @@ export class DashboardComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result === true) {
-        this.loadDashboardData(); 
-      }
+      if (result === true) this.loadDashboardData(); 
     });
   }
 
+  openNewTransactionDialog(): void {
+    const dialogRef = this.dialog.open(TransactionDialogComponent, {
+      width: '400px',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) this.loadDashboardData(); 
+    });
+  }
 }
