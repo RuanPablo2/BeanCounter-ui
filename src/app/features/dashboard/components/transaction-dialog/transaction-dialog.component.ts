@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -27,18 +27,16 @@ import { TransactionService } from '../../../../core/services/transaction.servic
 })
 export class TransactionDialogComponent {
   transactionForm: FormGroup;
+  isEditMode = false;
 
   constructor(
     private fb: FormBuilder,
     private transactionService: TransactionService,
-    private dialogRef: MatDialogRef<TransactionDialogComponent>
+    private dialogRef: MatDialogRef<TransactionDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any
   ) {
-  
     const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const today = `${year}-${month}-${day}`;
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
     this.transactionForm = this.fb.group({
       description: ['', [Validators.required]],
@@ -46,19 +44,33 @@ export class TransactionDialogComponent {
       date: [today, [Validators.required]], 
       type: ['EXPENSE', [Validators.required]] 
     });
+
+    if (this.data && this.data.id) {
+      this.isEditMode = true;
+
+      this.transactionForm.patchValue({
+        description: this.data.description,
+        amount: this.data.amount,
+        date: this.data.date,
+        type: this.data.type
+      });
+    }
   }
 
   onSave(): void {
-    if (this.transactionForm.valid) {
+    if (this.transactionForm.invalid) return;
+
+    if (this.isEditMode) {
+
+      this.transactionService.updateTransaction(this.data.id, this.transactionForm.value).subscribe({
+        next: () => this.dialogRef.close(true),
+        error: (err) => console.error('Error updating', err)
+      });
+    } else {
+
       this.transactionService.createTransaction(this.transactionForm.value).subscribe({
-        next: (response) => {
-          console.log('Transaction saved!', response);
-          this.dialogRef.close(true);
-        },
-        error: (err) => {
-          console.error('Error saving transaction', err);
-          alert('Failed to save transaction. Please try again.');
-        }
+        next: () => this.dialogRef.close(true),
+        error: (err) => console.error('Error creating', err)
       });
     }
   }

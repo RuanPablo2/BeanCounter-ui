@@ -34,7 +34,7 @@ export class DashboardComponent implements OnInit {
     totalExpense: 0
   };
 
-  displayedColumns: string[] = ['description', 'date', 'type', 'amount'];
+  displayedColumns: string[] = ['description', 'date', 'type', 'amount', 'actions'];
   recentTransactions: Transaction[] = [];
 
   constructor(
@@ -73,6 +73,33 @@ export class DashboardComponent implements OnInit {
     const dialogRef = this.dialog.open(TransactionDialogComponent, {
       width: '400px',
       disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.loadDashboardData(); 
+      }
+    });
+  }
+
+  deleteTransaction(id: number): void {
+
+    if (confirm('Are you sure you want to delete this transaction?')) {
+      this.transactionService.deleteTransaction(id).subscribe({
+        next: () => {
+          console.log('Transaction deleted!');
+          this.loadDashboardData();
+        },
+        error: (err) => console.error('Error deleting transaction', err)
+      });
+    }
+  }
+
+  editTransaction(transaction: Transaction): void {
+    const dialogRef = this.dialog.open(TransactionDialogComponent, {
+      width: '400px',
+      disableClose: true,
+      data: transaction
     });
 
     dialogRef.afterClosed().subscribe(result => {
