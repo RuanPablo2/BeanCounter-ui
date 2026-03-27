@@ -9,6 +9,9 @@ import { MatTableModule } from '@angular/material/table';
 import { DashboardService, DashboardSummary } from '../../core/services/dashboard.service';
 import { TransactionService, Transaction } from '../../core/services/transaction.service';
 
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { TransactionDialogComponent } from './components/transaction-dialog/transaction-dialog.component';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -17,7 +20,8 @@ import { TransactionService, Transaction } from '../../core/services/transaction
     MatCardModule,
     MatIconModule,
     MatButtonModule,
-    MatTableModule
+    MatTableModule,
+    MatDialogModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
@@ -35,7 +39,8 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private dashboardService: DashboardService,
-    private transactionService: TransactionService
+    private transactionService: TransactionService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -43,7 +48,6 @@ export class DashboardComponent implements OnInit {
   }
 
   loadDashboardData(): void {
-    // Find the card totals
     this.dashboardService.getSummary().subscribe({
       next: (data) => {
         console.log('DADOS REAIS DO DASHBOARD:', data);
@@ -54,7 +58,7 @@ export class DashboardComponent implements OnInit {
       }
     });
 
-    // Retrieve the list of transactions for the table
+
     this.transactionService.getTransactions().subscribe({
       next: (data) => {
         this.recentTransactions = data;
@@ -64,4 +68,18 @@ export class DashboardComponent implements OnInit {
       }
     });
   }
+
+  openNewTransactionDialog(): void {
+    const dialogRef = this.dialog.open(TransactionDialogComponent, {
+      width: '400px',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.loadDashboardData(); 
+      }
+    });
+  }
+
 }
