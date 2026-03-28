@@ -1,4 +1,4 @@
-# 📊 Financial Dashboard - Front-end (Angular)
+# 📊 Bean Counter (Financial Dashboard) - Front-end (Angular)
 
 ![Angular](https://img.shields.io/badge/Angular-DD0031?style=flat&logo=angular&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)
