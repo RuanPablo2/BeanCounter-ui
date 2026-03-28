@@ -137,3 +137,39 @@
     color: #d32f2f;
   }
 }
+
+/* Filters */
+.filters-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 15px;
+
+  .search-bar {
+    flex-grow: 1;
+    max-width: 500px;
+    margin-bottom: 0;
+
+    mat-icon {
+      color: #888;
+      margin-right: 8px;
+    }
+  }
+
+  .date-filter-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+
+    .date-range-field {
+      width: 300px;
+      margin-bottom: 0;
+    }
+
+    .clear-btn {
+      margin-top: 8px;
+    }
+  }
+}

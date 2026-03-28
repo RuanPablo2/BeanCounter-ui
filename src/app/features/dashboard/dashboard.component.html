@@ -76,16 +76,51 @@
     </mat-card-header>
 
     <mat-card-content>
-      <mat-form-field appearance="outline" class="search-bar">
-        <mat-label>Search transactions...</mat-label>
-        <mat-icon matPrefix>search</mat-icon>
-        <input
-          matInput
-          (keyup)="applyFilter($event)"
-          placeholder="Ex. Supermarket, EXPENSE, or 150"
-        />
-      </mat-form-field>
+      <div class="filters-row">
+        <mat-form-field appearance="outline" class="search-bar">
+          <mat-label>Search transactions...</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input
+            matInput
+            (keyup)="applyFilter($event)"
+            placeholder="Ex. Supermarket, EXPENSE, or 150"
+          />
+        </mat-form-field>
 
+        <div class="date-filter-container">
+          <mat-form-field appearance="outline" class="date-range-field">
+            <mat-label>Filter by date range</mat-label>
+            <mat-date-range-input [rangePicker]="picker">
+              <input
+                matStartDate
+                [(ngModel)]="startDate"
+                placeholder="Start date"
+              />
+              <input
+                matEndDate
+                [(ngModel)]="endDate"
+                (dateChange)="onDateChange()"
+                placeholder="End date"
+              />
+            </mat-date-range-input>
+            <mat-datepicker-toggle
+              matIconSuffix
+              [for]="picker"
+            ></mat-datepicker-toggle>
+            <mat-date-range-picker #picker></mat-date-range-picker>
+          </mat-form-field>
+
+          <button
+            *ngIf="startDate || endDate"
+            mat-button
+            color="warn"
+            (click)="clearFilter()"
+            class="clear-btn"
+          >
+            Clear Filter
+          </button>
+        </div>
+      </div>
       <table mat-table [dataSource]="dataSource" class="transactions-table">
         <ng-container matColumnDef="description">
           <th mat-header-cell *matHeaderCellDef>Description</th>

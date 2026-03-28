@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,6 +14,8 @@ import { TransactionService, Transaction } from '../../core/services/transaction
 
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TransactionDialogComponent } from './components/transaction-dialog/transaction-dialog.component';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 import { ThemeService } from '../../core/services/theme.service';
 
@@ -21,13 +24,16 @@ import { ThemeService } from '../../core/services/theme.service';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatCardModule,
     MatIconModule,
     MatButtonModule,
     MatTableModule,
     MatDialogModule,
     MatFormFieldModule,
-    MatInputModule 
+    MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
@@ -44,6 +50,9 @@ export class DashboardComponent implements OnInit {
   
   dataSource = new MatTableDataSource<Transaction>([]);
 
+  startDate: Date | null = null;
+  endDate: Date | null = null;
+
   constructor(
     private dashboardService: DashboardService,
     private transactionService: TransactionService,
@@ -55,18 +64,38 @@ export class DashboardComponent implements OnInit {
     this.loadDashboardData();
   }
 
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   loadDashboardData(): void {
-    this.dashboardService.getSummary().subscribe({
+    const startStr = this.startDate ? this.formatDate(this.startDate) : undefined;
+    const endStr = this.endDate ? this.formatDate(this.endDate) : undefined;
+
+    this.dashboardService.getSummary(startStr, endStr).subscribe({
       next: (data) => this.summary = data,
       error: (err) => console.error('Error loading dashboard summary', err)
     });
 
-    this.transactionService.getTransactions().subscribe({
-      next: (data) => {
-        this.dataSource.data = data;
-      },
+    this.transactionService.getTransactions(startStr, endStr).subscribe({
+      next: (data) => this.dataSource.data = data,
       error: (err) => console.error('Error loading transactions', err)
     });
+  }
+
+  onDateChange(): void {
+    if (this.startDate && this.endDate) {
+      this.loadDashboardData();
+    }
+  }
+
+  clearFilter(): void {
+    this.startDate = null;
+    this.endDate = null;
+    this.loadDashboardData();
   }
 
   applyFilter(event: Event): void {
