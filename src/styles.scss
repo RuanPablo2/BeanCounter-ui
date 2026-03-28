@@ -1,4 +1,83 @@
-/* You can add global styles to this file, and also import other style files */
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body.dark-theme {
+  background-color: #121212;
+  color: #e0e0e0;
+
+  .dashboard-container {
+    background-color: #121212;
+  }
+
+  .dashboard-header {
+    .greeting {
+      color: #ffffff !important;
+      font-weight: 500;
+    }
+    .subtitle {
+      color: #cccccc !important;
+    }
+  }
+
+  .mat-mdc-card,
+  .summary-card,
+  .table-card {
+    background-color: #1e1e1e !important;
+    color: #e0e0e0 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .summary-card {
+    .info p {
+      color: #aaaaaa !important;
+    }
+
+    &.balance-card .info h3 {
+      color: #ffffff !important;
+    }
+  }
+
+  .text-success {
+    color: #4caf50 !important;
+  }
+  .text-danger {
+    color: #f44336 !important;
+  }
+
+  .mat-mdc-table {
+    background-color: #1e1e1e !important;
+  }
+
+  .mat-mdc-header-cell {
+    color: #aaaaaa !important;
+    border-bottom-color: #333333 !important;
+  }
+
+  .mat-mdc-cell {
+    color: #e0e0e0 !important;
+    border-bottom-color: #333333 !important;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    background-color: #1e1e1e !important;
+  }
+  .mat-mdc-form-field-input-control {
+    color: #e0e0e0 !important;
+  }
+
+  .mat-mdc-dialog-container {
+    .mdc-dialog__surface {
+      background-color: #1e1e1e !important;
+      color: #e0e0e0 !important;
+    }
+    .mat-mdc-dialog-title {
+      color: #ffffff;
+    }
+  }
+}

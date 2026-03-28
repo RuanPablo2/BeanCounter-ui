@@ -14,6 +14,8 @@ import { TransactionService, Transaction } from '../../core/services/transaction
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TransactionDialogComponent } from './components/transaction-dialog/transaction-dialog.component';
 
+import { ThemeService } from '../../core/services/theme.service';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -45,7 +47,8 @@ export class DashboardComponent implements OnInit {
   constructor(
     private dashboardService: DashboardService,
     private transactionService: TransactionService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private themeService: ThemeService
   ) {}
 
   ngOnInit(): void {
@@ -101,5 +104,13 @@ export class DashboardComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result === true) this.loadDashboardData(); 
     });
+  }
+
+  isDarkMode(): boolean {
+    return this.themeService.isDarkMode();
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
   }
 }
