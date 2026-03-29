@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -57,7 +58,8 @@ export class DashboardComponent implements OnInit {
     private dashboardService: DashboardService,
     private transactionService: TransactionService,
     private dialog: MatDialog,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -142,4 +144,9 @@ export class DashboardComponent implements OnInit {
   toggleTheme(): void {
     this.themeService.toggleTheme();
   }
+
+  logout(): void {
+  localStorage.removeItem('jwt_token');
+  this.router.navigate(['/login']);
+}
 }
