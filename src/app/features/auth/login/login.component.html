@@ -2,30 +2,53 @@
   <mat-card class="login-card">
     <mat-card-header>
       <mat-card-title>BeanCounter</mat-card-title>
-      <mat-card-subtitle>Sign in to continue</mat-card-subtitle>
+      <mat-card-subtitle>Acesse seu painel financeiro</mat-card-subtitle>
     </mat-card-header>
 
     <mat-card-content>
+      <div class="demo-alert">
+        <mat-icon class="alert-icon">info</mat-icon>
+        <p>
+          O banco de dados é <strong>resetado a cada 12 horas</strong> para
+          manter o ambiente de demonstração limpo e seguro.
+        </p>
+      </div>
+
+      <div class="demo-actions">
+        <button
+          mat-stroked-button
+          class="demo-btn"
+          type="button"
+          (click)="loginAsDemo()"
+        >
+          <mat-icon>visibility</mat-icon> Acessar Conta de Demonstração
+        </button>
+      </div>
+
+      <div class="auth-divider">
+        <span>ou use suas credenciais</span>
+      </div>
+
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email</mat-label>
+          <mat-label>E-mail</mat-label>
           <input
             matInput
             type="email"
             formControlName="email"
-            placeholder="example@email.com"
+            placeholder="exemplo@email.com"
           />
           <mat-icon matPrefix>email</mat-icon>
-          <mat-error *ngIf="loginForm.get('email')?.hasError('required')"
-            >Email is required</mat-error
-          >
-          <mat-error *ngIf="loginForm.get('email')?.hasError('email')"
-            >Enter a valid email</mat-error
-          >
+          <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
+            O e-mail é obrigatório
+          </mat-error>
+          <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
+            Formato de e-mail inválido
+          </mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
+          <mat-label>Senha</mat-label>
           <input
             matInput
             [type]="hidePassword ? 'password' : 'text'"
@@ -37,32 +60,32 @@
             mat-icon-button
             matSuffix
             (click)="hidePassword = !hidePassword"
-            [attr.aria-label]="'Toggle password visibility'"
+            [attr.aria-label]="'Alternar visibilidade da senha'"
           >
             <mat-icon>{{
               hidePassword ? "visibility_off" : "visibility"
             }}</mat-icon>
           </button>
-          <mat-error *ngIf="loginForm.get('password')?.hasError('required')"
-            >Password is required</mat-error
-          >
+          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+            A senha é obrigatória
+          </mat-error>
         </mat-form-field>
 
         <button
-          mat-raised-button
+          mat-flat-button
           color="primary"
           type="submit"
           class="full-width login-btn"
-          [disabled]="loginForm.invalid"
+          [disabled]="loginForm.invalid || isLoading"
         >
-          Sign In
+          {{ isLoading ? "Entrando..." : "Entrar" }}
         </button>
       </form>
     </mat-card-content>
 
     <mat-card-footer>
       <p class="register-link">
-        Don't have an account? <a routerLink="/register">Sign up here</a>
+        Não tem uma conta? <a routerLink="/register">Cadastre-se aqui</a>
       </p>
     </mat-card-footer>
   </mat-card>
