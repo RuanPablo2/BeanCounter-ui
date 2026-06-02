@@ -10,8 +10,14 @@ import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
-import { DashboardService, DashboardSummary } from '../../core/services/dashboard.service';
-import { TransactionService, Transaction } from '../../core/services/transaction.service';
+import {
+  DashboardService,
+  DashboardSummary,
+} from '../../core/services/dashboard.service';
+import {
+  TransactionService,
+  Transaction,
+} from '../../core/services/transaction.service';
 
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TransactionDialogComponent } from './components/transaction-dialog/transaction-dialog.component';
@@ -34,21 +40,26 @@ import { ThemeService } from '../../core/services/theme.service';
     MatFormFieldModule,
     MatInputModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
   ],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent implements OnInit {
-  
   summary: DashboardSummary = {
     balance: 0,
     totalIncome: 0,
-    totalExpense: 0
+    totalExpense: 0,
   };
 
-  displayedColumns: string[] = ['description', 'date', 'type', 'amount', 'actions'];
-  
+  displayedColumns: string[] = [
+    'description',
+    'date',
+    'type',
+    'amount',
+    'actions',
+  ];
+
   dataSource = new MatTableDataSource<Transaction>([]);
 
   startDate: Date | null = null;
@@ -59,7 +70,7 @@ export class DashboardComponent implements OnInit {
     private transactionService: TransactionService,
     private dialog: MatDialog,
     private themeService: ThemeService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -74,17 +85,19 @@ export class DashboardComponent implements OnInit {
   }
 
   loadDashboardData(): void {
-    const startStr = this.startDate ? this.formatDate(this.startDate) : undefined;
+    const startStr = this.startDate
+      ? this.formatDate(this.startDate)
+      : undefined;
     const endStr = this.endDate ? this.formatDate(this.endDate) : undefined;
 
     this.dashboardService.getSummary(startStr, endStr).subscribe({
-      next: (data) => this.summary = data,
-      error: (err) => console.error('Error loading dashboard summary', err)
+      next: (data) => (this.summary = data),
+      error: (err) => console.error('Error loading dashboard summary', err),
     });
 
     this.transactionService.getTransactions(startStr, endStr).subscribe({
-      next: (data) => this.dataSource.data = data,
-      error: (err) => console.error('Error loading transactions', err)
+      next: (data) => (this.dataSource.data = data),
+      error: (err) => console.error('Error loading transactions', err),
     });
   }
 
@@ -109,7 +122,7 @@ export class DashboardComponent implements OnInit {
     if (confirm('Are you sure you want to delete this transaction?')) {
       this.transactionService.deleteTransaction(id).subscribe({
         next: () => this.loadDashboardData(),
-        error: (err) => console.error('Error deleting transaction', err)
+        error: (err) => console.error('Error deleting transaction', err),
       });
     }
   }
@@ -118,22 +131,22 @@ export class DashboardComponent implements OnInit {
     const dialogRef = this.dialog.open(TransactionDialogComponent, {
       width: '400px',
       disableClose: true,
-      data: transaction
+      data: transaction,
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === true) this.loadDashboardData(); 
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === true) this.loadDashboardData();
     });
   }
 
   openNewTransactionDialog(): void {
     const dialogRef = this.dialog.open(TransactionDialogComponent, {
       width: '400px',
-      disableClose: true
+      disableClose: true,
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === true) this.loadDashboardData(); 
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === true) this.loadDashboardData();
     });
   }
 
@@ -146,7 +159,12 @@ export class DashboardComponent implements OnInit {
   }
 
   logout(): void {
-  localStorage.removeItem('jwt_token');
-  this.router.navigate(['/login']);
-}
+    localStorage.removeItem('jwt_token');
+
+    if (this.isDarkMode()) {
+      this.toggleTheme();
+    }
+
+    this.router.navigate(['/login']);
+  }
 }
