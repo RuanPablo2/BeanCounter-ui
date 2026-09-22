@@ -9,6 +9,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'; // Importado para o spinner de loading
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar'; // Importado para os alertas
 
 import {
   DashboardService,
@@ -41,6 +43,8 @@ import { ThemeService } from '../../core/services/theme.service';
     MatInputModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatProgressSpinnerModule, // Adicionado aqui
+    MatSnackBarModule,        // Adicionado aqui
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
@@ -52,8 +56,13 @@ export class DashboardComponent implements OnInit {
     totalExpense: 0,
   };
 
+  smartInput: string = '';
+  isProcessingAi: boolean = false;
+
+  // 'category' adicionada à lista de colunas a serem exibidas na tabela
   displayedColumns: string[] = [
     'description',
+    'category',
     'date',
     'type',
     'amount',
@@ -71,6 +80,7 @@ export class DashboardComponent implements OnInit {
     private dialog: MatDialog,
     private themeService: ThemeService,
     private router: Router,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -117,6 +127,29 @@ export class DashboardComponent implements OnInit {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
+
+  // --- NOVA FUNÇÃO DA IA AQUI ---
+  processarIA(): void {
+    if (!this.smartInput.trim()) return;
+
+    this.isProcessingAi = true;
+    this.transactionService.createSmartTransaction(this.smartInput).subscribe({
+      next: (res) => {
+        // Exibe a mensagem amigável em português gerada pela IA
+        this.snackBar.open(res.message, 'OK', { duration: 5000 });
+        this.smartInput = '';
+        this.isProcessingAi = false;
+        // Recarrega os dados para a nova transação aparecer na tabela
+        this.loadDashboardData(); 
+      },
+      error: (err) => {
+        console.error('Erro ao processar IA', err);
+        this.snackBar.open('Erro ao processar o texto com a IA.', 'Fechar', { duration: 3000 });
+        this.isProcessingAi = false;
+      }
+    });
+  }
+  // ------------------------------
 
   deleteTransaction(id: number): void {
     if (confirm('Are you sure you want to delete this transaction?')) {

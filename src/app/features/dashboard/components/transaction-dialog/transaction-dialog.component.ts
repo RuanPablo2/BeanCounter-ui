@@ -39,10 +39,11 @@ export class TransactionDialogComponent {
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
     this.transactionForm = this.fb.group({
-      description: ['', [Validators.required]],
-      amount: ['', [Validators.required, Validators.min(0.01)]],
-      date: [today, [Validators.required]], 
-      type: ['EXPENSE', [Validators.required]] 
+      description: [data?.description || '', Validators.required],
+      amount: [data?.amount || '', [Validators.required, Validators.min(0.01)]],
+      type: [data?.type || 'EXPENSE', Validators.required],
+      category: [data?.category || ''],
+      date: [data?.date || new Date(), Validators.required]
     });
 
     if (this.data && this.data.id) {

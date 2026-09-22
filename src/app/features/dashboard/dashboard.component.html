@@ -1,8 +1,8 @@
 <div class="dashboard-container">
   <header class="dashboard-header">
     <div>
-      <h2 class="greeting">Welcome back!</h2>
-      <p class="subtitle">Here is your financial overview.</p>
+      <h2 class="greeting">Bem-vindo de volta!</h2>
+      <p class="subtitle">Aqui está o seu resumo financeiro.</p>
     </div>
 
     <div
@@ -15,13 +15,13 @@
         class="add-btn"
         (click)="openNewTransactionDialog()"
       >
-        <mat-icon>add</mat-icon> New Transaction
+        <mat-icon>add</mat-icon> Nova Transação
       </button>
 
       <button
         mat-icon-button
         (click)="toggleTheme()"
-        matTooltip="Toggle Dark Mode"
+        matTooltip="Alternar Tema Escuro"
       >
         <mat-icon>{{ isDarkMode() ? "light_mode" : "dark_mode" }}</mat-icon>
       </button>
@@ -30,7 +30,7 @@
         mat-icon-button
         color="warn"
         (click)="logout()"
-        matTooltip="Logout"
+        matTooltip="Sair"
       >
         <mat-icon>logout</mat-icon>
       </button>
@@ -41,7 +41,7 @@
     <mat-card class="summary-card balance-card">
       <mat-card-content class="card-content">
         <div class="info">
-          <p>Total Balance</p>
+          <p>Saldo Total</p>
           <h3>{{ summary.balance | currency: "BRL" : "symbol" }}</h3>
         </div>
         <div class="icon-wrapper primary-icon">
@@ -53,7 +53,7 @@
     <mat-card class="summary-card income-card">
       <mat-card-content class="card-content">
         <div class="info">
-          <p>Incomes</p>
+          <p>Receitas</p>
           <h3 class="text-success">
             {{ summary.totalIncome | currency: "BRL" : "symbol" }}
           </h3>
@@ -67,7 +67,7 @@
     <mat-card class="summary-card expense-card">
       <mat-card-content class="card-content">
         <div class="info">
-          <p>Expenses</p>
+          <p>Despesas</p>
           <h3 class="text-danger">
             {{ summary.totalExpense | currency: "BRL" : "symbol" }}
           </h3>
@@ -79,37 +79,54 @@
     </mat-card>
   </div>
 
+  <mat-card class="smart-input-card" style="margin-bottom: 20px;">
+    <mat-card-content style="display: flex; gap: 16px; align-items: center; padding: 16px;">
+      <mat-icon color="primary" [class.ai-pulse]="isProcessingAi">auto_awesome</mat-icon>
+
+      <mat-form-field appearance="outline" style="flex: 1; margin-bottom: -1.25em;">
+        <mat-label>Transação Inteligente (Ex: Gastei 45 reais de Uber hoje)</mat-label>
+        <input matInput [(ngModel)]="smartInput" (keyup.enter)="processarIA()" [disabled]="isProcessingAi"
+          placeholder="Digite o gasto ou ganho de forma natural...">
+      </mat-form-field>
+
+      <button mat-flat-button color="primary" (click)="processarIA()" [disabled]="isProcessingAi || !smartInput">
+        <span *ngIf="!isProcessingAi">Processar via IA</span>
+        <mat-spinner *ngIf="isProcessingAi" diameter="20"></mat-spinner>
+      </button>
+    </mat-card-content>
+  </mat-card>
+
   <mat-card class="table-card">
     <mat-card-header>
-      <mat-card-title>Recent Transactions</mat-card-title>
+      <mat-card-title>Transações Recentes</mat-card-title>
     </mat-card-header>
 
     <mat-card-content>
       <div class="filters-row">
         <mat-form-field appearance="outline" class="search-bar">
-          <mat-label>Search transactions...</mat-label>
+          <mat-label>Buscar transações...</mat-label>
           <mat-icon matPrefix>search</mat-icon>
           <input
             matInput
             (keyup)="applyFilter($event)"
-            placeholder="Ex. Supermarket, EXPENSE, or 150"
+            placeholder="Ex: Supermercado, Despesa ou 150"
           />
         </mat-form-field>
 
         <div class="date-filter-container">
           <mat-form-field appearance="outline" class="date-range-field">
-            <mat-label>Filter by date range</mat-label>
+            <mat-label>Filtrar por período</mat-label>
             <mat-date-range-input [rangePicker]="picker">
               <input
                 matStartDate
                 [(ngModel)]="startDate"
-                placeholder="Start date"
+                placeholder="Data inicial"
               />
               <input
                 matEndDate
                 [(ngModel)]="endDate"
                 (dateChange)="onDateChange()"
-                placeholder="End date"
+                placeholder="Data final"
               />
             </mat-date-range-input>
             <mat-datepicker-toggle
@@ -126,27 +143,36 @@
             (click)="clearFilter()"
             class="clear-btn"
           >
-            Clear Filter
+            Limpar Filtro
           </button>
         </div>
       </div>
       <table mat-table [dataSource]="dataSource" class="transactions-table">
         <ng-container matColumnDef="description">
-          <th mat-header-cell *matHeaderCellDef>Description</th>
+          <th mat-header-cell *matHeaderCellDef>Descrição</th>
           <td mat-cell *matCellDef="let element">
             <strong>{{ element.description }}</strong>
           </td>
         </ng-container>
 
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef>Categoria</th>
+          <td mat-cell *matCellDef="let element">
+            <span style="opacity: 0.7; font-size: 0.9em;">
+              {{ element.category || 'N/A' }}
+            </span>
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="date">
-          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <th mat-header-cell *matHeaderCellDef>Data</th>
           <td mat-cell *matCellDef="let element">
             {{ element.date | date: "shortDate" }}
           </td>
         </ng-container>
 
         <ng-container matColumnDef="type">
-          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <th mat-header-cell *matHeaderCellDef>Tipo</th>
           <td mat-cell *matCellDef="let element">
             <span
               class="badge"
@@ -154,13 +180,13 @@
                 element.type === 'INCOME' ? 'badge-success' : 'badge-danger'
               "
             >
-              {{ element.type }}
+              {{ element.type === 'INCOME' ? 'Receita' : 'Despesa' }}
             </span>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="amount">
-          <th mat-header-cell *matHeaderCellDef>Amount</th>
+          <th mat-header-cell *matHeaderCellDef>Valor</th>
           <td
             mat-cell
             *matCellDef="let element"
@@ -174,7 +200,7 @@
 
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef class="actions-column">
-            Actions
+            Ações
           </th>
           <td mat-cell *matCellDef="let element" class="actions-column">
             <button

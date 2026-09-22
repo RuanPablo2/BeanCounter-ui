@@ -7,8 +7,14 @@ export interface Transaction {
   id?: number;
   description: string;
   amount: number;
-  date: string;
+  date?: string;
   type: 'INCOME' | 'EXPENSE';
+  category?: string;
+}
+
+export interface SmartTransactionResponse {
+  transaction: Transaction;
+  message: string;
 }
 
 @Injectable({
@@ -37,5 +43,9 @@ export class TransactionService {
 
   deleteTransaction(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  createSmartTransaction(text: string): Observable<SmartTransactionResponse> {
+    return this.http.post<SmartTransactionResponse>(`${this.apiUrl}/smart`, { text });
   }
 }
