@@ -9,8 +9,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'; // Importado para o spinner de loading
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar'; // Importado para os alertas
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { MatChipsModule } from '@angular/material/chips';
 
 import {
   DashboardService,
@@ -43,8 +44,9 @@ import { ThemeService } from '../../core/services/theme.service';
     MatInputModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatProgressSpinnerModule, // Adicionado aqui
-    MatSnackBarModule,        // Adicionado aqui
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
+    MatChipsModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
@@ -59,7 +61,6 @@ export class DashboardComponent implements OnInit {
   smartInput: string = '';
   isProcessingAi: boolean = false;
 
-  // 'category' adicionada à lista de colunas a serem exibidas na tabela
   displayedColumns: string[] = [
     'description',
     'category',
@@ -73,6 +74,10 @@ export class DashboardComponent implements OnInit {
 
   startDate: Date | null = null;
   endDate: Date | null = null;
+
+  uniqueCategories: string[] = [];
+  selectedCategory: string = '';
+  searchText: string = '';
 
   constructor(
     private dashboardService: DashboardService,
@@ -106,9 +111,30 @@ export class DashboardComponent implements OnInit {
     });
 
     this.transactionService.getTransactions(startStr, endStr).subscribe({
-      next: (data) => (this.dataSource.data = data),
+      next: (data) => {
+        this.dataSource.data = data;
+        this.extractCategories(data);
+      },
       error: (err) => console.error('Error loading transactions', err),
     });
+  }
+
+  private extractCategories(transactions: Transaction[]): void {
+    const allCategories = transactions
+      .map(t => t.category)
+      .filter((c): c is string => !!c && c.trim() !== '');
+    
+    this.uniqueCategories = [...new Set(allCategories)].sort(); 
+  }
+
+  filterByCategory(category: string): void {
+    if (this.selectedCategory === category) {
+      this.selectedCategory = '';
+      this.dataSource.filter = this.searchText.trim().toLowerCase();
+    } else {
+      this.selectedCategory = category;
+      this.dataSource.filter = category.toLowerCase();
+    }
   }
 
   onDateChange(): void {
@@ -125,21 +151,20 @@ export class DashboardComponent implements OnInit {
 
   applyFilter(event: Event): void {
     const filterValue = (event.target as HTMLInputElement).value;
+    this.searchText = filterValue;
+    this.selectedCategory = '';
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
-  // --- NOVA FUNÇÃO DA IA AQUI ---
   processarIA(): void {
     if (!this.smartInput.trim()) return;
 
     this.isProcessingAi = true;
     this.transactionService.createSmartTransaction(this.smartInput).subscribe({
       next: (res) => {
-        // Exibe a mensagem amigável em português gerada pela IA
         this.snackBar.open(res.message, 'OK', { duration: 5000 });
         this.smartInput = '';
         this.isProcessingAi = false;
-        // Recarrega os dados para a nova transação aparecer na tabela
         this.loadDashboardData(); 
       },
       error: (err) => {
@@ -149,10 +174,9 @@ export class DashboardComponent implements OnInit {
       }
     });
   }
-  // ------------------------------
 
   deleteTransaction(id: number): void {
-    if (confirm('Are you sure you want to delete this transaction?')) {
+    if (confirm('Tem certeza que deseja excluir esta transação?')) {
       this.transactionService.deleteTransaction(id).subscribe({
         next: () => this.loadDashboardData(),
         error: (err) => console.error('Error deleting transaction', err),
